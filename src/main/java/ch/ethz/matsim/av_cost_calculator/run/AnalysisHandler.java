@@ -35,6 +35,7 @@ public class AnalysisHandler implements ActivityStartEventHandler, ActivityEndEv
 	public AnalysisHandler(Network network, AVValidator validator) {
 		this.network = network;
 		this.validator = validator;
+		reset(0);
 	}
 
 	public long getFleetSize() {
@@ -102,5 +103,11 @@ public class AnalysisHandler implements ActivityStartEventHandler, ActivityEndEv
 	}
 
 	public void reset(int iteration) {
+		dropoffDistance.clear();
+		pickupTimes.clear();
+		speedStatistics.clear();
+		passengerDistanceStatistics.clear();
+		activeTime = 0.0;
+		totalDistance = 0.0;
 	}
 }
