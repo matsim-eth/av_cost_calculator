@@ -30,7 +30,7 @@ public class ComputeCostsFromEvents {
 		new MatsimNetworkReader(network).readFile(inputNetworkFile);
 
 		EventsManager eventsManager = EventsUtils.createEventsManager();
-		AnalysisHandler analysisHandler = new AnalysisHandler(network, new AnyOperatorValidator());
+		AnalysisHandler analysisHandler = new AnalysisHandler(network, new AnyAVValidator());
 		eventsManager.addHandler(analysisHandler);
 		new MatsimEventsReader(eventsManager).readFile(inputEventsFile);
 
