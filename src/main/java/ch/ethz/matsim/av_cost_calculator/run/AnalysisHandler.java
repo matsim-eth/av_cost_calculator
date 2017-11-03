@@ -29,9 +29,12 @@ public class AnalysisHandler implements ActivityStartEventHandler, ActivityEndEv
 
 	private double activeTime = 0.0D;
 	private double totalDistance = 0.0D;
+	
+	final private AVValidator validator;
 
-	public AnalysisHandler(Network network) {
+	public AnalysisHandler(Network network, AVValidator validator) {
 		this.network = network;
+		this.validator = validator;
 	}
 
 	public long getFleetSize() {
@@ -55,40 +58,46 @@ public class AnalysisHandler implements ActivityStartEventHandler, ActivityEndEv
 	}
 
 	public void handleEvent(ActivityEndEvent event) {
-		if (event.getActType().equals("AVPickup")) {
-			pickupTimes.put(event.getPersonId(), Double.valueOf(event.getTime()));
-			dropoffDistance.put(event.getPersonId(), new AtomicDouble(0.0D));
+		if (validator.isRelevant(event.getPersonId().toString())) {
+			if (event.getActType().equals("AVPickup")) {
+				pickupTimes.put(event.getPersonId(), Double.valueOf(event.getTime()));
+				dropoffDistance.put(event.getPersonId(), new AtomicDouble(0.0D));
+			}
 		}
 	}
 
 	public void handleEvent(ActivityStartEvent event) {
-		if (event.getActType().equals("AVStay")) {
-			allAVIds.add(event.getPersonId());
-		}
-
-		if (event.getActType().equals("AVDropoff")) {
-			Double pickupTime = (Double) pickupTimes.remove(event.getPersonId());
-			AtomicDouble distance = (AtomicDouble) dropoffDistance.remove(event.getPersonId());
-
-			if ((pickupTime != null) && (distance != null)) {
-				double travelTime = event.getTime() - pickupTime.doubleValue();
-				speedStatistics.addValue(distance.doubleValue() / 1000.0D / (travelTime / 3600.0D));
-
-				activeTime += travelTime;
-				passengerDistanceStatistics.addValue(distance.doubleValue() / 1000.0D);
+		if (validator.isRelevant(event.getPersonId().toString())) {
+			if (event.getActType().equals("AVStay")) {
+				allAVIds.add(event.getPersonId());
+			}
+	
+			if (event.getActType().equals("AVDropoff")) {
+				Double pickupTime = (Double) pickupTimes.remove(event.getPersonId());
+				AtomicDouble distance = (AtomicDouble) dropoffDistance.remove(event.getPersonId());
+	
+				if ((pickupTime != null) && (distance != null)) {
+					double travelTime = event.getTime() - pickupTime.doubleValue();
+					speedStatistics.addValue(distance.doubleValue() / 1000.0D / (travelTime / 3600.0D));
+	
+					activeTime += travelTime;
+					passengerDistanceStatistics.addValue(distance.doubleValue() / 1000.0D);
+				}
 			}
 		}
 	}
 
 	public void handleEvent(LinkEnterEvent event) {
-		AtomicDouble distance = (AtomicDouble) dropoffDistance.get(Id.createVehicleId(event.getVehicleId()));
-
-		if (distance != null) {
-			distance.addAndGet(((Link) network.getLinks().get(event.getLinkId())).getLength());
-		}
-
-		if (event.getVehicleId().toString().contains("av")) {
-			totalDistance += ((Link) network.getLinks().get(event.getLinkId())).getLength() / 1000.0D;
+		if (validator.isRelevant(event.getVehicleId().toString())) {
+			AtomicDouble distance = (AtomicDouble) dropoffDistance.get(Id.createVehicleId(event.getVehicleId()));
+	
+			if (distance != null) {
+				distance.addAndGet(((Link) network.getLinks().get(event.getLinkId())).getLength());
+			}
+	
+			if (event.getVehicleId().toString().contains("av")) {
+				totalDistance += ((Link) network.getLinks().get(event.getLinkId())).getLength() / 1000.0D;
+			}
 		}
 	}
 
