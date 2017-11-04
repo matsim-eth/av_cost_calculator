@@ -41,7 +41,7 @@ public class ComputeCostsFromEvents {
 
 		CostCalculatorExecutor executor = new CostCalculatorExecutor(workingDirectory, sourceURL);
 
-		Map<String, String> parameters = new ParameterBuilder().build(analysisHandler);
+		Map<String, String> parameters = new ParameterBuilder(1.0).build(analysisHandler);
 
 		List<String> output = new LinkedList<>();
 

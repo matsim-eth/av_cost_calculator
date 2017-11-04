@@ -1,6 +1,7 @@
 package ch.ethz.matsim.av_cost_calculator;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -12,6 +13,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CostCalculatorExecutor {
+	final private Logger logger = Logger.getLogger(CostCalculatorExecutor.class);
+	
     final private URL sourceURL;
 
     final private File workingDirectoryPath;
@@ -56,6 +59,8 @@ public class CostCalculatorExecutor {
     }
 
     private void setupWorkingDirectory() {
+    	logger.info("Setting up working directory at " + workingDirectoryPath);
+    	
         try {
             FileUtils.copyURLToFile(new URL(sourceURL, "CostCalculator.R"), new File(workingDirectoryPath, "CostCalculator.R"));
             FileUtils.copyURLToFile(new URL(sourceURL, "Main.R"), new File(workingDirectoryPath, "Main_Original.R"));
@@ -68,6 +73,8 @@ public class CostCalculatorExecutor {
     }
 
     private void updateWorkingDirectoryForR() {
+    	logger.info("Updating working directory in R script");
+    	
         try {
             String script = FileUtils.readFileToString(originalRunScriptPath);
             script = script.replace("{{ working_directory }}", workingDirectoryPath.getAbsolutePath());
@@ -78,6 +85,7 @@ public class CostCalculatorExecutor {
     }
 
     private void updateInputFile(Map<String, String> parameters) {
+    	logger.info("Updating input file...");
         if (inputPath.exists()) inputPath.delete();
 
         try {
@@ -103,6 +111,7 @@ public class CostCalculatorExecutor {
     }
 
     private double readOutputFile(Map<String, String> parameters) {
+    	logger.info("Reading output file...");
         Double result = null;
 
         String item = parameters.get("electric").equals("1") ? "AE-S05" : "A-S05";
@@ -113,7 +122,12 @@ public class CostCalculatorExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (line.contains(item)) {
-                    result = Double.parseDouble(line.split(";")[5]);
+                	try {
+                		result = Double.parseDouble(line.split(";")[5]);
+                	} catch (NumberFormatException e) {
+                		result = Double.NaN;
+                		logger.warn("R script returned invalid expression (" + result + "), returning NaN");
+                	}
                 }
             }
 
@@ -124,12 +138,14 @@ public class CostCalculatorExecutor {
             }
         } catch (IOException e) {
             e.printStackTrace();
+            throw new RuntimeException();
         }
 
         return result;
     }
 
     private void runRScript() {
+    	logger.info("Running R script... ");
         Runtime runtime = Runtime.getRuntime();
 
         long startTime = System.currentTimeMillis();
