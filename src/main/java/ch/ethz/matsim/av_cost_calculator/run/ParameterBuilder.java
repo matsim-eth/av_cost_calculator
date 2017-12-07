@@ -16,13 +16,15 @@ public class ParameterBuilder {
 	public Map<String, String> build(AnalysisHandler analysisHandler) {
 		Map<String, String> parameters = new TreeMap<>();
 		
-		if (analysisHandler.getFleetSize() < 150) {
+		int fleetSize = (int) (analysisHandler.getFleetSize() / scaling);
+		
+		if (fleetSize < 150) {
 			logger.warn("Requested fleet size of " + analysisHandler.getFleetSize() + " vehicles is to low. Setting to 150 (minimum value for cost calculator)");
 		}
 		
 		parameters.put("Area", "Urban");
 		parameters.put("VehicleType", "Solo");
-		parameters.put("FleetSize", String.valueOf(Math.max(150, analysisHandler.getFleetSize())));
+		parameters.put("FleetSize", String.valueOf(Math.max(150, fleetSize)));
 		parameters.put("electric", "1");
 		parameters.put("automated", "1");
 		parameters.put("fleetOperation", "1");
