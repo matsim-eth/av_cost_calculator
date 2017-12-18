@@ -148,21 +148,16 @@ public class CostCalculatorExecutor {
     	logger.info("Running R script... ");
         Runtime runtime = Runtime.getRuntime();
 
-        long startTime = System.currentTimeMillis();
-        long nextOutput = System.currentTimeMillis();
-
+        double startTime = System.nanoTime() * 1e-9;
+        
         try {
-            Process process = runtime.exec("Rscript Main.R", new String[] {}, workingDirectoryPath);
+            Process process = runtime.exec("Rscript --vanilla Main.R", null, workingDirectoryPath);
 
             while (process.isAlive()) {
-                if (nextOutput <= System.currentTimeMillis()) {
-                    nextOutput = System.currentTimeMillis() + 1000;
-                }
-
                 Thread.sleep(10);
 
-                if (System.currentTimeMillis() - startTime > 10000) {
-                    throw new RuntimeException("Cost Calculator took longer than 10s");
+                if (System.nanoTime() * 1e-9 - startTime > 10) {
+                    throw new RuntimeException("Cost Calculator took longer than 30s");
                 }
             }
         } catch (IOException | InterruptedException e) {
