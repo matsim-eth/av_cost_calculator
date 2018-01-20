@@ -8,9 +8,11 @@ import org.apache.log4j.Logger;
 public class ParameterBuilder {
 	final private Logger logger = Logger.getLogger(ParameterBuilder.class);
 	final private double scaling;
+	final private double totalTime;
 	
-	public ParameterBuilder(double scaling) {
+	public ParameterBuilder(double scaling, double totalTime) {
 		this.scaling = scaling;
+		this.totalTime = totalTime;
 	}
 	
 	public Map<String, String> build(AnalysisHandler analysisHandler) {
@@ -29,13 +31,13 @@ public class ParameterBuilder {
 		parameters.put("automated", "1");
 		parameters.put("fleetOperation", "1");
 
-		parameters.put("ph_operationHours_av", "30");
+		parameters.put("ph_operationHours_av", String.valueOf((int) Math.floor(totalTime / 3600.0)));
 		parameters.put("ph_operationHours", "0");
-		parameters.put("ph_relActiveTime", String.valueOf((1.0 / scaling) * analysisHandler.getRelativeActiveTime(108000.0D)));
+		parameters.put("ph_relActiveTime", String.valueOf(100.0 * analysisHandler.getRelativeActiveTime(totalTime)));
 		parameters.put("ph_avOccupancy", "100");
 		parameters.put("ph_avSpeed", String.valueOf(analysisHandler.getAverageSpeed()));
 		parameters.put("ph_avTripLengthPass", String.valueOf(analysisHandler.getAveragePassengerTripLength()));
-		parameters.put("ph_relEmptyRides", String.valueOf((1.0 / scaling) * analysisHandler.getRelativeEmptyDistance()));
+		parameters.put("ph_relEmptyRides", String.valueOf(100.0 * analysisHandler.getRelativeEmptyDistance()));
 		parameters.put("ph_relMaintenanceRides", "0");
 		parameters.put("ph_relMaintenanceHours", "0");
 		

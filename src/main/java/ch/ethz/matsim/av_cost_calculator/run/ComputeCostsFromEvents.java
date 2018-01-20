@@ -33,7 +33,7 @@ public class ComputeCostsFromEvents {
 		AnalysisHandler analysisHandler = new AnalysisHandler(network, new AnyAVValidator());
 		eventsManager.addHandler(analysisHandler);
 		new MatsimEventsReader(eventsManager).readFile(inputEventsFile);
-
+		
 		URL sourceURL = CostCalculator.class.getClassLoader().getResource("ch/ethz/matsim/av_cost_calculator/");
 
 		File workingDirectory = new File("output/test/cost_calculator_test");
@@ -41,7 +41,7 @@ public class ComputeCostsFromEvents {
 
 		CostCalculatorExecutor executor = new CostCalculatorExecutor(workingDirectory, sourceURL);
 
-		Map<String, String> parameters = new ParameterBuilder(1.0).build(analysisHandler);
+		Map<String, String> parameters = new ParameterBuilder(0.1, 24.0 * 3600.0).build(analysisHandler);
 
 		List<String> output = new LinkedList<>();
 
