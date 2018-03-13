@@ -157,7 +157,7 @@ public class CostCalculatorExecutor {
                 Thread.sleep(10);
 
                 if (System.nanoTime() * 1e-9 - startTime > 30) {
-                    throw new RuntimeException("Cost Calculator took longer than 30s");
+                	logger.info("Waiting for cost calculator ...");
                 }
             }
         } catch (IOException | InterruptedException e) {
