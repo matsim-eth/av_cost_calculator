@@ -26,8 +26,8 @@ public class TestCostCalculatorExecutor {
         parameters.put("Area", "Urban");
         parameters.put("VehicleType", "Midsize");
         parameters.put("FleetSize", "1500");
-        parameters.put("electric", "");
-        parameters.put("automated", "");
+        parameters.put("electric", "1");
+        parameters.put("automated", "1");
         parameters.put("fleetOperation", "1");
 
         parameters.put("ph_operationHours_av", "3.8");
@@ -41,6 +41,6 @@ public class TestCostCalculatorExecutor {
         parameters.put("ph_relMaintenanceHours", "5");
 
         double result = executor.computePricePerPassengerKm(parameters);
-        Assert.assertEquals(0.461058774767991, result, 1e-6);
+        Assert.assertEquals(0.5562841614, result, 1e-6);
     }
 }
