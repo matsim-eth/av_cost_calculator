@@ -21,10 +21,8 @@
 #################################################################################################
 # Read Excel input
 
-vehicleCost <- (read_excel("Input.xlsx","Vehicles", col_names=TRUE))
-vehicleCost <- vehicleCost[!apply(vehicleCost,1,FUN=function(x)sum(is.na(x))>=(ncol(vehicleCost)-1)),]
-
-ptCost <- (read_excel("Input.xlsx","PT", col_names=TRUE))
+vehicleCost <- na.omit(read_excel("Input.xlsx","Vehicles", col_names=TRUE))
+ptCost <- na.omit(read_excel("Input.xlsx","PT", col_names=TRUE))
 parameters <- read_excel("Input.xlsx","Parameters", col_names=TRUE)
 
 ptCost$Comment <- NULL
@@ -76,15 +74,9 @@ fixedVehicleCostCalculator <- function(vehType, elec, autom, fleet, trips){
           (1+vehicleCost[vehicleCost$Type == "automated",3:dim(t.vehicleCost)[2]])
   }
   if (fleet) {
-        #t.vehicleCost[3:dim(t.vehicleCost)[2]] <-
-         ## t.vehicleCost[3:dim(t.vehicleCost)[2]] *
-          #(1+vehicleCost[vehicleCost$Type == "fleet",3:dim(t.vehicleCost)[2]])
-      
-      vatmulti <- 1/(1+parameters[parameters$Name == "vat",]$Value)*vehicleCost[vehicleCost$Type=="vat_deductible",3:ncol(t.vehicleCost)]
-      vatmulti[vatmulti==0] <- 1
       t.vehicleCost[3:dim(t.vehicleCost)[2]] <-
-        t.vehicleCost[3:dim(t.vehicleCost)[2]] *
-        (1+vehicleCost[vehicleCost$Type == "fleet",3:dim(t.vehicleCost)[2]])*vatmulti
+          t.vehicleCost[3:dim(t.vehicleCost)[2]] *
+          (1+vehicleCost[vehicleCost$Type == "fleet",3:dim(t.vehicleCost)[2]])
   }
   
   # fixed capital costs
@@ -99,7 +91,7 @@ fixedVehicleCostCalculator <- function(vehType, elec, autom, fleet, trips){
       int <- interestsum(t.vehicleCost$Acquisition_L,
                          interest=parameters[parameters$Name == "Interest_priv",]$Value,
                          years=parameters[parameters$Name == "Kreditlaufzeit_Y_priv",]$Value,
-                         payfreq=12) / 
+                         payfreq=1) / 
               parameters[parameters$Name == "VehicleLifetime_Y",]$Value
       
   }

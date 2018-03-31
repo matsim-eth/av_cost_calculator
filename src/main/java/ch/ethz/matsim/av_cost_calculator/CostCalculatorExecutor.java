@@ -123,7 +123,7 @@ public class CostCalculatorExecutor {
             while ((line = reader.readLine()) != null) {
                 if (line.contains(item)) {
                 	try {
-                		result = Double.parseDouble(line.split(";")[5]);
+                		result = Double.parseDouble(line.split(";")[6]);
                 	} catch (NumberFormatException e) {
                 		result = Double.NaN;
                 		logger.warn("R script returned invalid expression (" + result + "), returning NaN");
