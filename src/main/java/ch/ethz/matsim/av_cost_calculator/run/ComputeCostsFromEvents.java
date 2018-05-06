@@ -8,7 +8,6 @@ import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -30,10 +29,11 @@ public class ComputeCostsFromEvents {
 		new MatsimNetworkReader(network).readFile(inputNetworkFile);
 
 		EventsManager eventsManager = EventsUtils.createEventsManager();
-		AnalysisHandler analysisHandler = new AnalysisHandler(network, new AnyAVValidator());
+		SingleOccupancyAnalysisHandler analysisHandler = new SingleOccupancyAnalysisHandler(network,
+				new AnyAVValidator(), 24.0 * 3600.0);
 		eventsManager.addHandler(analysisHandler);
 		new MatsimEventsReader(eventsManager).readFile(inputEventsFile);
-		
+
 		URL sourceURL = CostCalculator.class.getClassLoader().getResource("ch/ethz/matsim/av_cost_calculator/");
 
 		File workingDirectory = new File("output/test/cost_calculator_test");
