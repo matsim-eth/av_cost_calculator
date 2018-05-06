@@ -9,10 +9,12 @@ public class ParameterBuilder {
 	final private Logger logger = Logger.getLogger(ParameterBuilder.class);
 	final private double scaling;
 	final private double totalTime;
+	final private String vehicleType;
 
-	public ParameterBuilder(double scaling, double totalTime) {
+	public ParameterBuilder(double scaling, double totalTime, String vehicleType) {
 		this.scaling = scaling;
 		this.totalTime = totalTime;
+		this.vehicleType = vehicleType;
 	}
 
 	public Map<String, String> build(PricingAnalysisHandler analysisHandler) {
@@ -26,7 +28,7 @@ public class ParameterBuilder {
 		}
 
 		parameters.put("Area", "Urban");
-		parameters.put("VehicleType", "Solo");
+		parameters.put("VehicleType", vehicleType);
 		parameters.put("FleetSize", String.valueOf(Math.max(150, fleetSize)));
 		parameters.put("electric", "1");
 		parameters.put("automated", "1");

@@ -89,11 +89,13 @@ public class MultiOccupancyAnalysisHandler implements PersonDepartureEventHandle
 			double travelTime = event.getTime() - departureTime;
 
 			totalTravelDistance += distance;
-			totalActiveTime += travelTime;
+			totalTravelTime += travelTime;
 			totalPassengerTime += travelTime * (double) occupancy;
 
 			if (occupancy == 0) {
 				totalEmptyDistance += distance;
+			} else {
+				totalActiveTime += travelTime;
 			}
 		}
 	}
@@ -133,7 +135,7 @@ public class MultiOccupancyAnalysisHandler implements PersonDepartureEventHandle
 
 	@Override
 	public double getAveragePassengerTripLength() {
-		return totalPassengerDistance / numberOfPassegerTrips;
+		return 1e-3 * totalPassengerDistance / numberOfPassegerTrips;
 	}
 
 	@Override
@@ -143,7 +145,7 @@ public class MultiOccupancyAnalysisHandler implements PersonDepartureEventHandle
 
 	@Override
 	public double getOccupancy() {
-		return totalPassengerTime / totalTravelTime / (double) numberOfSeats;
+		return totalPassengerTime / totalActiveTime / (double) numberOfSeats;
 	}
 
 	@Override

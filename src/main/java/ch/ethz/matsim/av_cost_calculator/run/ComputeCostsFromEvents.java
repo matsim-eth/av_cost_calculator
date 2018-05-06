@@ -11,11 +11,12 @@ import java.util.Map;
 
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.api.experimental.events.EventsManager;
+import org.matsim.core.events.EventsReaderXMLv1;
 import org.matsim.core.events.EventsUtils;
-import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 
+import ch.ethz.matsim.av.schedule.AVTransitEventMapper;
 import ch.ethz.matsim.av_cost_calculator.CostCalculator;
 import ch.ethz.matsim.av_cost_calculator.CostCalculatorExecutor;
 
@@ -29,10 +30,16 @@ public class ComputeCostsFromEvents {
 		new MatsimNetworkReader(network).readFile(inputNetworkFile);
 
 		EventsManager eventsManager = EventsUtils.createEventsManager();
-		SingleOccupancyAnalysisHandler analysisHandler = new SingleOccupancyAnalysisHandler(network,
-				new AnyAVValidator(), 24.0 * 3600.0);
+		// SingleOccupancyAnalysisHandler analysisHandler = new
+		// SingleOccupancyAnalysisHandler(network,
+		// new AnyAVValidator(), 24.0 * 3600.0);
+		MultiOccupancyAnalysisHandler analysisHandler = new MultiOccupancyAnalysisHandler(network, new AnyAVValidator(),
+				24.0 * 3600.0, 1);
 		eventsManager.addHandler(analysisHandler);
-		new MatsimEventsReader(eventsManager).readFile(inputEventsFile);
+
+		EventsReaderXMLv1 reader = new EventsReaderXMLv1(eventsManager);
+		reader.addCustomEventMapper("AVTransit", new AVTransitEventMapper());
+		reader.readFile(inputEventsFile);
 
 		URL sourceURL = CostCalculator.class.getClassLoader().getResource("ch/ethz/matsim/av_cost_calculator/");
 
@@ -41,7 +48,7 @@ public class ComputeCostsFromEvents {
 
 		CostCalculatorExecutor executor = new CostCalculatorExecutor(workingDirectory, sourceURL);
 
-		Map<String, String> parameters = new ParameterBuilder(0.1, 24.0 * 3600.0).build(analysisHandler);
+		Map<String, String> parameters = new ParameterBuilder(0.1, 24.0 * 3600.0, "Solo").build(analysisHandler);
 
 		List<String> output = new LinkedList<>();
 
