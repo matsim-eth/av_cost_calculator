@@ -1,21 +1,21 @@
 #################################################################################################
 # About this Code
 #################################################################################################
-#
+# 
 # The framework consists of three main scripts:
-#   - This script (Main.R) reads the input from Input.xlsx on vehicle types and
-#     operational models. For each operational model, it creates four scenarios for the four
-#     different combinations of with/without automation and/or electrification. It passes the
+#   - This script (Main.R) reads the input from Input.xlsx on vehicle types and 
+#     operational models. For each operational model, it creates four scenarios for the four 
+#     different combinations of with/without automation and/or electrification. It passes the 
 #     scenarios on to the script ScenarioAnalyzer.R for calculation of the cost structure.
 #   - ScenarioAnalyzer.R takes the scenarios from Main.R, defines the different
 #     response values (e.g. cost per vehicle kilometer, cost per passenger kilometer, ...).
 #     It passes on the scenarios to CostCalculator.R for the calculation of the totals of each
-#     cost component. It returns a data frame including the different response values for all
+#     cost component. It returns a data frame including the different response values for all 
 #     scenarios.
 #   - CostCalculator.R contains individual functions to calculate the various cost components.
 #     It takes a scenario and returns a data frame object with one row. The columns are the
 #     totals of each cost component for the given scenario.
-#
+# 
 #################################################################################################
 
 
@@ -32,7 +32,7 @@ rm(list = ls())
 list.of.packages <- c("readxl", "stringr","ggplot2","gridExtra")
 
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) install.packages(new.packages, repos="https://stat.ethz.ch/CRAN/")
+if(length(new.packages)) install.packages(new.packages)
 (lapply(list.of.packages, require, character.only = TRUE))
 
 
@@ -40,9 +40,8 @@ if(length(new.packages)) install.packages(new.packages, repos="https://stat.ethz
 #################################################################################################
 # Set working directory
 
-args = commandArgs(trailingOnly=TRUE)
+#setwd("P:/_TEMP/Becker_Henrik/_AV Kosten/CostCalculatorExtern/")
 setwd("{{ working_directory }}")
-
 #################################################################################################
 # Load cost calculator scripts
 
@@ -58,9 +57,13 @@ scen <- read_excel("Input.xlsx","Realizations", col_names=TRUE)
 
 
 # reformatting
-scen <- scen[which(grepl("^.", scen$Scenario)),which(grepl("^S", colnames(scen)))]
-#scen <- scen[which(scen$data == 1),]
-#scen$data <- NULL
+scen <- scen[which(grepl("^d_", scen$Scenario)==FALSE),which(colnames(scen) != "")]
+if(colnames(scen)[ncol(scen)]!="data"){
+    scen <- scen[,-c((which(colnames(scen)=="data")+1):ncol(scen))]
+}
+scen <- scen[,!apply(scen,2,FUN=function(x) sum(is.na(x))==nrow(scen))]
+scen <- scen[which(scen$data == 1),]
+scen$data <- NULL
 scen <- t(scen)
 
 colnames(scen) <- scen[1,]
@@ -94,7 +97,8 @@ rm(scen, autom.scen, elect.scen, au.el.scen)
 
 nonDouble <- c("VehicleType","electric","automated","fleetOperation", "Area")
 
-
+scenarios[scenarios=="TRUE"]<-1
+scenarios[scenarios=="FALSE"]<-0
 
 #################################################################################################
 # Recode input
@@ -135,10 +139,9 @@ full.resDF <- createResDF(0)
 # calculate results using ScenarioAnalyzer.R
 
 for (i in 1:dim(scenarios)[1]){
-  print(i)
   t.resDF.scen <- scenarioAnalyzer(scenario = scenarios[i,])
   row.names(t.resDF.scen) <- row.names(scenarios[i,])
-
+  
   full.resDF <- rbind(full.resDF, t.resDF.scen)
   rm(t.resDF.scen)
 }
@@ -148,8 +151,9 @@ for (i in 1:dim(scenarios)[1]){
 # To avoid confusion, the original components are deleted
 full.resDF$acquisition_var <- full.resDF$acquisition_fix <- full.resDF$interest_var <- full.resDF$interest_fix <- NULL
 
-# write results to file
-write.table(full.resDF, "results_main.csv", sep=";", row.names=TRUE)
+# write results to file 
+full.resDF<-cbind(Service=row.names(full.resDF),full.resDF)
+write.table(full.resDF, "results_main.csv", sep=";", row.names=FALSE)
 
 
 #################################################################################################

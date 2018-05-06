@@ -63,19 +63,16 @@ nonptScenarioAnalyzer <- function(t.scenario){
   t.ph_KM <- (t.scenario$ph_operationHours * t.scenario$ph_relActiveTime * t.scenario$ph_avSpeed
                 * (1 + t.scenario$ph_relEmptyRides)
                 * (1 + t.scenario$ph_relMaintenanceRides))
-  
-  t.ph_KM <- (t.scenario$ph_operationHours * t.scenario$ph_relActiveTime * t.scenario$ph_avSpeed)/(1- (t.scenario$ph_relEmptyRides+t.scenario$ph_relMaintenanceRides))
-  
-  t.oph_KM <- (t.scenario$oph_operationHours * t.scenario$oph_relActiveTime * t.scenario$oph_avSpeed)/(1- (t.scenario$oph_relEmptyRides+t.scenario$oph_relMaintenanceRides))
-  
-  t.ngt_KM <- (t.scenario$ngt_operationHours * t.scenario$ngt_relActiveTime * t.scenario$ngt_avSpeed)/(1- (t.scenario$ngt_relEmptyRides+t.scenario$ngt_relMaintenanceRides))
-  
- 
+  t.oph_KM <- (t.scenario$oph_operationHours * t.scenario$oph_relActiveTime * t.scenario$oph_avSpeed
+                * (1 + t.scenario$oph_relEmptyRides)
+                * (1 + t.scenario$oph_relMaintenanceRides))
+  t.ngt_KM <- (t.scenario$ngt_operationHours * t.scenario$ngt_relActiveTime * t.scenario$ngt_avSpeed
+                * (1 + t.scenario$ngt_relEmptyRides)
+                * (1 + t.scenario$ngt_relMaintenanceRides))
   t.totKM <- sum(c(t.ph_KM, t.oph_KM, t.ngt_KM), na.rm=TRUE)
-  
-  t.ph_passKM <- (t.scenario$ph_operationHours * t.scenario$ph_relActiveTime * t.scenario$ph_avSpeed) * t.scenario$ph_avOccupancy * t.cap
-  t.oph_passKM <- (t.scenario$oph_operationHours * t.scenario$oph_relActiveTime * t.scenario$oph_avSpeed) * t.scenario$oph_avOccupancy * t.cap
-  t.ngt_passKM <- (t.scenario$ngt_operationHours * t.scenario$ngt_relActiveTime * t.scenario$ngt_avSpeed) * t.scenario$ngt_avOccupancy * t.cap
+  t.ph_passKM <- t.ph_KM * t.scenario$ph_avOccupancy * t.cap
+  t.oph_passKM <- t.oph_KM * t.scenario$oph_avOccupancy * t.cap
+  t.ngt_passKM <- t.ngt_KM * t.scenario$ngt_avOccupancy * t.cap
   t.passKM <- sum(c(t.ph_passKM, t.oph_passKM, t.ngt_passKM), na.rm=TRUE)
   
   # number of trips
@@ -106,7 +103,7 @@ nonptScenarioAnalyzer <- function(t.scenario){
   resDF$CostPerVehKM <- t.totalCost_Veh / t.totKM
   resDF$CostPerSeatKM <- resDF$CostPerVehKM / t.cap
   resDF$CostPerPassKM <- t.totalCost_Veh / t.passKM
-  resDF$PricePerPassKM <- resDF$CostPerPassKM / ((1-parameters[parameters$Name == "yield_on_sales",]$Value)*(1-parameters[parameters$Name == "payment_transaction_fee",]$Value)) * (1+parameters[parameters$Name == "vat",]$Value)
+  resDF$PricePerPassKM <- resDF$CostPerPassKM / (1-parameters[parameters$Name == "yield_on_sales",]$Value) * (1+parameters[parameters$Name == "vat",]$Value)
     
   resDF$acquisition <- resDF$acquisition_var + resDF$acquisition_fix
   resDF$interest <- resDF$interest_var + resDF$interest_fix
