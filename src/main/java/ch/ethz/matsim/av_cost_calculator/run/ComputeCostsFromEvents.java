@@ -30,11 +30,11 @@ public class ComputeCostsFromEvents {
 		new MatsimNetworkReader(network).readFile(inputNetworkFile);
 
 		EventsManager eventsManager = EventsUtils.createEventsManager();
-		// SingleOccupancyAnalysisHandler analysisHandler = new
-		// SingleOccupancyAnalysisHandler(network,
-		// new AnyAVValidator(), 24.0 * 3600.0);
-		MultiOccupancyAnalysisHandler analysisHandler = new MultiOccupancyAnalysisHandler(network, new AnyAVValidator(),
-				24.0 * 3600.0, 1);
+		SingleOccupancyAnalysisHandler analysisHandler = new SingleOccupancyAnalysisHandler(network,
+				new AnyAVValidator(), 24.0 * 3600.0);
+		// MultiOccupancyAnalysisHandler analysisHandler = new
+		// MultiOccupancyAnalysisHandler(network, new AnyAVValidator(),
+		// 24.0 * 3600.0, 1);
 		eventsManager.addHandler(analysisHandler);
 
 		EventsReaderXMLv1 reader = new EventsReaderXMLv1(eventsManager);
