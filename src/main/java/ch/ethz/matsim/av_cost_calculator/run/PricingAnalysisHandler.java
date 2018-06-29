@@ -16,4 +16,8 @@ public interface PricingAnalysisHandler extends EventHandler {
 	double getOccupancy();
 
 	void resetHandler();
+	
+	double getTotalPassengerDistance();
+	
+	long getNumberOfTrips();
 }

@@ -68,6 +68,16 @@ public class SingleOccupancyAnalysisHandler
 	public double getRelativeEmptyDistance() {
 		return 1.0D - passengerDistanceStatistics.getSum() / totalDistance;
 	}
+	
+	@Override
+	public double getTotalPassengerDistance() {
+		return passengerDistanceStatistics.getSum();
+	}
+
+	@Override
+	public long getNumberOfTrips() {
+		return passengerDistanceStatistics.getN();
+	}
 
 	@Override
 	public double getOccupancy() {

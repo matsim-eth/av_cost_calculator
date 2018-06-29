@@ -59,6 +59,16 @@ public class MultiOccupancyAnalysisHandler implements PersonDepartureEventHandle
 	private long numberOfPassegerTrips;
 
 	@Override
+	public double getTotalPassengerDistance() {
+		return 1e-3 * totalPassengerDistance;
+	}
+
+	@Override
+	public long getNumberOfTrips() {
+		return numberOfPassegerTrips;
+	}
+
+	@Override
 	public void resetHandler() {
 		occupancies.clear();
 		departureTimes.clear();
