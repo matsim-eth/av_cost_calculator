@@ -87,7 +87,7 @@ occupancy.resDF <- merge(occupancy.resDF, subset(occupancy.scenarios.full, selec
 # Plot
 
 size=22
-text <- element_text(size=size,family="Times")
+text <- element_text(size=size)
 
 p1 <- ggplot(data =
                occupancy.resDF[!occupancy.resDF$electric & !occupancy.resDF$automated,]) +
@@ -96,7 +96,7 @@ p1 <- ggplot(data =
   scale_y_continuous(name="Price per passenger km [CHF]") +
   coord_cartesian(xlim=c(0,75), ylim=c(0,1.5)) +
   ggtitle("Conventional") +
-  theme(plot.title=text,axis.text= text,axis.title.x = text,axis.title.y = text,legend.text = text,legend.title = text,strip.text = text,
+  theme(axis.text= text,axis.title.x = text,axis.title.y = text,legend.text = text,legend.title = text,strip.text = text,
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
@@ -109,7 +109,7 @@ p2 <- ggplot(data =
   scale_y_continuous(name="Price per passenger km [CHF]") +
   coord_cartesian(xlim=c(0,75), ylim=c(0,1.5)) +
   ggtitle("Autonomous-Electric") +
-  theme(plot.title=text,axis.text= text,axis.title.x = text,axis.title.y = text,legend.text = text,legend.title = text,strip.text = text,
+  theme(axis.text= text,axis.title.x = text,axis.title.y = text,legend.text = text,legend.title = text,strip.text = text,
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),

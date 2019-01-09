@@ -40,8 +40,8 @@ if(length(new.packages)) install.packages(new.packages)
 #################################################################################################
 # Set working directory
 
-#setwd("P:/_TEMP/Becker_Henrik/_AV Kosten/CostCalculatorExtern/")
-setwd("{{ working_directory }}")
+setwd("P:/_TEMP/Becker_Henrik/_AV-cost_comparison/Original_Suisse/CostCalculatorExtern/")
+
 #################################################################################################
 # Load cost calculator scripts
 
@@ -53,17 +53,16 @@ source("ScenarioAnalyzer.R")
 #################################################################################################
 # Load Scenarios (from the Excel-tab "Realizations")
 
-scen <- read_excel("Input.xlsx","Realizations", col_names=TRUE)
+scen <- as.data.frame(read_excel("Input.xlsx","Realizations_ZH", col_names=TRUE))
 
 
 # reformatting
 scen <- scen[which(grepl("^d_", scen$Scenario)==FALSE),which(colnames(scen) != "")]
-if(colnames(scen)[ncol(scen)]!="data"){
-    scen <- scen[,-c((which(colnames(scen)=="data")+1):ncol(scen))]
-}
-scen <- scen[,!apply(scen,2,FUN=function(x) sum(is.na(x))==nrow(scen))]
 scen <- scen[which(scen$data == 1),]
-scen$data <- NULL
+
+scen <- scen[,scen[scen$Scenario == "VehicleType",] %in% c("VehicleType",vehicleCost$Type,ptCost$Type)]
+
+
 scen <- t(scen)
 
 colnames(scen) <- scen[1,]
@@ -97,8 +96,7 @@ rm(scen, autom.scen, elect.scen, au.el.scen)
 
 nonDouble <- c("VehicleType","electric","automated","fleetOperation", "Area")
 
-scenarios[scenarios=="TRUE"]<-1
-scenarios[scenarios=="FALSE"]<-0
+
 
 #################################################################################################
 # Recode input
@@ -139,12 +137,14 @@ full.resDF <- createResDF(0)
 # calculate results using ScenarioAnalyzer.R
 
 for (i in 1:dim(scenarios)[1]){
+  
   t.resDF.scen <- scenarioAnalyzer(scenario = scenarios[i,])
   row.names(t.resDF.scen) <- row.names(scenarios[i,])
   
   full.resDF <- rbind(full.resDF, t.resDF.scen)
   rm(t.resDF.scen)
 }
+
 # please ignore warning message "NAs introduced by coercion" as this is intended.
 
 # The fixed and variable components of acquisition and interest are summarized in new variables.
@@ -152,7 +152,7 @@ for (i in 1:dim(scenarios)[1]){
 full.resDF$acquisition_var <- full.resDF$acquisition_fix <- full.resDF$interest_var <- full.resDF$interest_fix <- NULL
 
 # write results to file 
-full.resDF<-cbind(Service=row.names(full.resDF),full.resDF)
+full.resDF <- cbind(Scenario=row.names(full.resDF),full.resDF)
 write.table(full.resDF, "results_main.csv", sep=";", row.names=FALSE)
 
 
@@ -164,7 +164,4 @@ resDF <- full.resDF
 rm(full.resDF)
 
 
-# run additional scripts
 
-#source("OccupancySubanalysis.R")
-#source("Plots.R")

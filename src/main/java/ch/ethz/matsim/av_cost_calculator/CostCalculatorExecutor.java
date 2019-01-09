@@ -53,6 +53,26 @@ public class CostCalculatorExecutor {
         rowMapping.put("ph_relEmptyRides", 18);
         rowMapping.put("ph_relMaintenanceRides", 19);
         rowMapping.put("ph_relMaintenanceHours", 20);
+        
+        rowMapping.put("oph_operationHours_av", 23);
+        rowMapping.put("oph_operationHours", 24);
+        rowMapping.put("oph_relActiveTime", 25);
+        rowMapping.put("oph_avOccupancy", 26);
+        rowMapping.put("oph_avSpeed", 27);
+        rowMapping.put("oph_avTripLengthPass", 28);
+        rowMapping.put("oph_relEmptyRides", 29);
+        rowMapping.put("oph_relMaintenanceRides", 30);
+        rowMapping.put("oph_relMaintenanceHours", 31);
+        
+        rowMapping.put("ngt_operationHours_av", 34);
+        rowMapping.put("ngt_operationHours", 35);
+        rowMapping.put("ngt_relActiveTime", 36);
+        rowMapping.put("ngt_avOccupancy", 37);
+        rowMapping.put("ngt_avSpeed", 38);
+        rowMapping.put("ngt_avTripLengthPass", 39);
+        rowMapping.put("ngt_relEmptyRides", 40);
+        rowMapping.put("ngt_relMaintenanceRides", 41);
+        rowMapping.put("ngt_relMaintenanceHours", 42);
 
         setupWorkingDirectory();
         updateWorkingDirectoryForR();
@@ -65,19 +85,22 @@ public class CostCalculatorExecutor {
             FileUtils.copyURLToFile(new URL(sourceURL, "CostCalculator.R"), new File(workingDirectoryPath, "CostCalculator.R"));
             FileUtils.copyURLToFile(new URL(sourceURL, "Main.R"), new File(workingDirectoryPath, "Main_Original.R"));
             FileUtils.copyURLToFile(new URL(sourceURL, "ScenarioAnalyzer.R"), new File(workingDirectoryPath, "ScenarioAnalyzer.R"));
-            FileUtils.copyURLToFile(new URL(sourceURL, "Template.xlsx"), new File(workingDirectoryPath, "Template.xlsx"));
+            FileUtils.copyURLToFile(new URL(sourceURL, "Input.xlsx"), new File(workingDirectoryPath, "Template.xlsx"));
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Error setting up working directory for Cost Calculator");
         }
     }
+    
+    private static final String INITIAL_WORKING_DIRECTORY = "P:/_TEMP/Becker_Henrik/_AV-cost_comparison/Original_Suisse/CostCalculatorExtern/";
 
     private void updateWorkingDirectoryForR() {
     	logger.info("Updating working directory in R script");
     	
         try {
             String script = FileUtils.readFileToString(originalRunScriptPath);
-            script = script.replace("{{ working_directory }}", workingDirectoryPath.getAbsolutePath());
+            script = script.replace(INITIAL_WORKING_DIRECTORY, workingDirectoryPath.getAbsolutePath());
+            script = script.replace("Realizations_ZH", "Realizations");
             FileUtils.writeStringToFile(runScriptPath, script);
         } catch (IOException e) {
             e.printStackTrace();
@@ -87,6 +110,26 @@ public class CostCalculatorExecutor {
     private void updateInputFile(Map<String, String> parameters) {
     	logger.info("Updating input file...");
         if (inputPath.exists()) inputPath.delete();
+        
+        parameters.put("oph_operationHours_av", "0");
+        parameters.put("oph_operationHours", "0");
+        parameters.put("oph_relActiveTime", "0");
+        parameters.put("oph_avOccupancy", "0");
+        parameters.put("oph_avSpeed", "0");
+        parameters.put("oph_avTripLengthPass", "0");
+        parameters.put("oph_relEmptyRides", "0");
+        parameters.put("oph_relMaintenanceRides", "0");
+        parameters.put("oph_relMaintenanceHours", "0");
+        
+        parameters.put("ngt_operationHours_av", "0");
+        parameters.put("ngt_operationHours", "0");
+        parameters.put("ngt_relActiveTime", "0");
+        parameters.put("ngt_avOccupancy", "0");
+        parameters.put("ngt_avSpeed", "0");
+        parameters.put("ngt_avTripLengthPass", "0");
+        parameters.put("ngt_relEmptyRides", "0");
+        parameters.put("ngt_relMaintenanceRides", "0");
+        parameters.put("ngt_relMaintenanceHours", "0");
 
         try {
             XSSFWorkbook originalWorkbook = new XSSFWorkbook(templatePath);
@@ -114,7 +157,7 @@ public class CostCalculatorExecutor {
     	logger.info("Reading output file...");
         Double result = null;
 
-        String item = parameters.get("electric").equals("1") ? "AE-S05" : "A-S05";
+        String item = parameters.get("electric").equals("1") ? "AE-S02" : "A-S02";
 
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(outputPath)));

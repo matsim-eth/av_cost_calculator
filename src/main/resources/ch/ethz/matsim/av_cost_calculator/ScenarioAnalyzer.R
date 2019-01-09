@@ -63,7 +63,6 @@ nonptScenarioAnalyzer <- function(t.scenario){
   t.ph_KM <- (t.scenario$ph_operationHours * t.scenario$ph_relActiveTime * t.scenario$ph_avSpeed
                 * (1 + t.scenario$ph_relEmptyRides)
                 * (1 + t.scenario$ph_relMaintenanceRides))
-  
   t.ph_KM <- (t.scenario$ph_operationHours * t.scenario$ph_relActiveTime * t.scenario$ph_avSpeed)/(1- (t.scenario$ph_relEmptyRides+t.scenario$ph_relMaintenanceRides))
   
   t.oph_KM <- (t.scenario$oph_operationHours * t.scenario$oph_relActiveTime * t.scenario$oph_avSpeed)/(1- (t.scenario$oph_relEmptyRides+t.scenario$oph_relMaintenanceRides))
@@ -167,7 +166,7 @@ ptScenarioAnalyzer <- function(t.scenario){
 # Switch between PT and fleet/private (non-PT)
 
 scenarioAnalyzer <- function(scenario){
-  if (scenario$VehicleType %in% ptCost$Type == FALSE) {
+  if ((scenario$VehicleType %in% ptCost$Type) == FALSE) {
     return(nonptScenarioAnalyzer(t.scenario = scenario))
   } else {
     return(ptScenarioAnalyzer(scenario))

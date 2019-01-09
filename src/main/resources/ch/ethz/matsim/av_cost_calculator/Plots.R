@@ -3,11 +3,8 @@
 # Please run Main.R first
 # -- Use Realizations_ZH instead of Realizations right below the comment Load Scenarios in Main.R
 
-windowsFonts(Times=windowsFont("Times New Roman"))
+setwd("P:/_TEMP/Becker_Henrik/_AV-cost_comparison/Original_Suisse/CostCalculatorExtern/")
 
-
-
-setwd("C:/Costs_SVN/head/")
 
 list.of.packages <- c("reshape","ggplot2","plyr","RColorBrewer","xtable")
 
@@ -18,8 +15,8 @@ if(length(new.packages)) install.packages(new.packages)
 
 #data for plots
 scenariosplots <- cbind(ID=rownames(scenarios),scenarios[,c("Area","VehicleType")])
-resDFplots <- cbind(ID=rownames(resDF),resDF)
-
+resDFplots <- resDF
+colnames(resDFplots)[1] <- "ID"
 dataplots <- merge(x = scenariosplots,y=resDFplots,by = "ID")
 
 #Intended for cost structures that are independent of the region
@@ -61,9 +58,10 @@ simpleCap <- function(x) {
 colnames(dataplots)<-sapply(colnames(dataplots), simpleCap)
 
 #Other_fix currently encompasses only tolls
-colnames(dataplots)[23] <- "Tolls"
-colnames(dataplots)[24] <- "Depreciation over Time"
-colnames(dataplots)[13] <- "Depreciation per Kilometre"
+colnames(dataplots)[colnames(dataplots)=="Other_fix"] <- "Tolls"
+colnames(dataplots)[colnames(dataplots)=="Acquisition"] <- "Depreciation over Time"
+colnames(dataplots)[colnames(dataplots)=="Deprecation"] <- "Depreciation per Kilometre"
+
 
 
 dataplots[,"Maintenance and Wear"] <- dataplots$Maintenance + dataplots$Tires
@@ -120,6 +118,9 @@ tex <- tex[!(tex$Operation=="Priv" & tex$Area=="Urb"),]
 
 colnames(tex)[6:8] <- paste(c("CostVehKM //linebreak in CHF","CostSeatKM //linebreak in CHF","CostPassKM //linebreak in CHF"))
 
+
+																					  
+
 sink("tables/appendixcosts.tex")
 print(xtable(tex),include.rownames = F,hline.after = NULL,only.contents = T,include.colnames = F)
 sink()
@@ -130,6 +131,9 @@ size=22
 text <- element_text(size=size,colour = "black",family="Times")
 
 #costs depending on distance
+																																  
+										 
+						 
 
 
 #--------------------Figure 1: Cost structure comparison with (Autonomous) and without (Conv) vehicle automation for private vehicles (Private Car) and taxi fleet vehicles without pooling (Ind. Taxi).----------------------------
@@ -138,10 +142,18 @@ cond <-  dataplots$VehicleType%in%c("Midsize") & dataplots$Area =="Urban" & data
 currdata<-dataplots[cond,]
 
 
+													
+																					
+													
+																									  
+																		  
 colnames(currdata)[which(colnames(currdata)=="Overhead")]<-"Overhead and Vehicle Operations"
 
 #Cost summaries not needed
-currdata<-melt(currdata[,c(1,4,5,6,7,8,9,10,19)*-1], id.vars=c("Area", "VehicleType", "OperationDetailed", "Propulsion","Steering"))
+#currdata<-melt(currdata[,c(1,4,5,6,7,8,9,10,19)*-1], id.vars=c("Area", "VehicleType", "OperationDetailed", "Propulsion","Steering"))
+
+currdata<-melt(currdata[,!(colnames(currdata)%in%c("ID","TotalCost","TotalCostPerVeh","CostPerVehKM","CostPerSeatKM","CostPerPassKM","PricePerPassKM","Operation"))], id.vars=c("Area", "VehicleType", "OperationDetailed", "Propulsion","Steering"))
+
 currdata <- currdata[currdata$value!=0,]
 
 
@@ -233,6 +245,7 @@ for(cat in unique(tex$Mode)){
   tex1<- cbind(tex1,temp[,c(2:3)])
 }
 colnames(tex1) <- c("Cost Type",rep(c("CPKM in CHF","Share of CPKM"),4))
+																					   
 
 sink("tables/coststructures.tex")
 print(xtable(tex1),include.rownames = F,hline.after = NULL,only.contents = T,include.colnames = F)
@@ -254,6 +267,14 @@ currdata$Area<-factor(currdata$Area,levels=c("Urban","Regional"))
 #The occupancy is therefore adjusted from 2.6 to 1.4
 #As the cleaning costs depend on the number of passenger trips, they are no adjusted
 
+																			   
+									  
+
+													  
+
+																		  
+
+									
 
 #Renaming the categories for the plot
 
@@ -295,6 +316,10 @@ p2 <-
         panel.background = element_blank()) 
 
 
+
+
+
+
 #Adjust the given path:
 
 ggsave("Plots/NotAVvsAV2.png",plot = p2,width=16,height=6,device = "png")
@@ -324,6 +349,10 @@ currdata$Newcategory<-factor(currdata$Newcategory,levels=c("Private aCar","Share
 currdata$Area<-factor(currdata$Area,levels=c("Urban","Regional","Interregional"))
 
 
+																	
+									  
+																	  
+																							  
 
 
 currdata[,"Cost_Type"] <- NA
@@ -346,6 +375,7 @@ cond2 <- currdata$Newcategory=="Private aCar"&currdata$Cost_Type=="Fixed Costs"
 currdata$Costs[cond2] <- round(currdata$Depreciation[cond2] + currdata$Interest[cond2] + currdata$Insurance[cond2] + currdata$Tax[cond2],2)
 
 currdata$Cost_Type <- factor(currdata$Cost_Type,levels=c("Fixed Costs","Variable Costs","Price"))
+																								 
 currdata$Costs<-round(currdata$Costs,2)
 
 
@@ -373,6 +403,9 @@ p <- ggplot(data=regdata)+ aes(x = Newcategory, y = Costs,fill=Cost_Type) +
         panel.background = element_blank()
         ) +  geom_text(aes(x = Newcategory,y = totals1,label=totals1,fill=NULL,family=text$family),data=totals, vjust=-1,size=size/2.5)+ ylim(0, max(totals$totals1)*1.2)
   
+
+
+																					  
 
 
 ggsave("Plots/AVE-models_fix_var_urban.png",width=12,height=6,plot = p,device = "png")

@@ -21,11 +21,9 @@
 #################################################################################################
 # Read Excel input
 
-vehicleCost <- (read_excel("Input.xlsx","Vehicles", col_names=TRUE))
-vehicleCost <- vehicleCost[!apply(vehicleCost,1,FUN=function(x)sum(is.na(x))>=(ncol(vehicleCost)-1)),]
-
-ptCost <- (read_excel("Input.xlsx","PT", col_names=TRUE))
-parameters <- read_excel("Input.xlsx","Parameters", col_names=TRUE)
+vehicleCost <- na.omit(as.data.frame(read_excel("Input.xlsx","Vehicles", col_names=TRUE)))
+ptCost <- na.omit(as.data.frame(read_excel("Input.xlsx","PT", col_names=TRUE)))
+parameters <- na.omit(as.data.frame(read_excel("Input.xlsx","Parameters", col_names=TRUE)))
 
 ptCost$Comment <- NULL
 parameters$Comment <- NULL
@@ -75,7 +73,7 @@ fixedVehicleCostCalculator <- function(vehType, elec, autom, fleet, trips){
           t.vehicleCost[3:dim(t.vehicleCost)[2]] *
           (1+vehicleCost[vehicleCost$Type == "automated",3:dim(t.vehicleCost)[2]])
   }
-  if (fleet) {
+   if (fleet) {
         #t.vehicleCost[3:dim(t.vehicleCost)[2]] <-
          ## t.vehicleCost[3:dim(t.vehicleCost)[2]] *
           #(1+vehicleCost[vehicleCost$Type == "fleet",3:dim(t.vehicleCost)[2]])
@@ -94,13 +92,13 @@ fixedVehicleCostCalculator <- function(vehType, elec, autom, fleet, trips){
       
   } else {
       # annual depreciation
-      acq <- t.vehicleCost$Acquisition_L / parameters[parameters$Name == "VehicleLifetime_Y",]$Value
+      acq <- t.vehicleCost$Acquisition_L / parameters[parameters$Name == "VehicleLifetime_priv_Y",]$Value
       # annual interest
       int <- interestsum(t.vehicleCost$Acquisition_L,
                          interest=parameters[parameters$Name == "Interest_priv",]$Value,
-                         years=parameters[parameters$Name == "Kreditlaufzeit_Y_priv",]$Value,
+                         years=parameters[parameters$Name == "Creditperiod_Y_priv",]$Value,
                          payfreq=12) / 
-              parameters[parameters$Name == "VehicleLifetime_Y",]$Value
+              parameters[parameters$Name == "VehicleLifetime_priv_Y",]$Value
       
   }
   
@@ -183,16 +181,16 @@ variableVehicleCostCalculator <- function(vehType, dailyKM, elec, autom, fleet){
   if (fleet) {
       dep <- 0
       # depreciation by distance
-      acq <- t.vehicleCost$Acquisition_L / parameters[parameters$Name == "VehicleLifetime_KM",]$Value
+      acq <- t.vehicleCost$Acquisition_L / parameters[parameters$Name == "VehicleLifetime_prof_KM",]$Value
       int <- interestsum(t.vehicleCost$Acquisition_L,
                          interest=parameters[parameters$Name == "Interest_comm",]$Value,
-                         years=parameters[parameters$Name == "Kreditlaufzeit_Y_comm",]$Value,
+                         years=parameters[parameters$Name == "Creditperiod_Y_comm",]$Value,
                          payfreq=1) / 
-      parameters[parameters$Name == "VehicleLifetime_KM",]$Value
+      parameters[parameters$Name == "VehicleLifetime_prof_KM",]$Value
       
   } else {
       # Use and scale TCS assumptions by vehicle price: CHF 0.07/km for a vehicle with price CHF 35'000.-
-      dep <- t.vehicleCost$Acquisition_L / parameters[parameters$Name == "referencePriceMidsizeCar_CHF",]$Value * parameters[parameters$Name == "variableDeprecationMidsizeCar_KM",]$Value
+      dep <- t.vehicleCost$Acquisition_L / parameters[parameters$Name == "referencePriceMidsizeCar_CHF",]$Value * parameters[parameters$Name == "variableDeprecationMidsizeCar_priv_KM",]$Value
       acq <- 0
       int <- 0
   }
@@ -256,8 +254,8 @@ salaryCostCalculator <- function(fleetSize, ophours, autom, fleet){
 
 overheadCostCalculator <- function(fleetSize, fleet){
 
-    overheadCost <- parameters[parameters$Name == "fleetOverhead_d",]$Value # Overhead per vehicle
-    operationsManagementCost <- parameters[parameters$Name == "operationsManagementCost",]$Value 
+    overheadCost <- parameters[parameters$Name == "fleetOverhead_veh_d",]$Value # Overhead per vehicle
+    operationsManagementCost_veh_d <- parameters[parameters$Name == "operationsManagementCost_veh_d",]$Value 
     fleetDefinitionSize <- parameters[parameters$Name == "fleetDefinitionSize",]$Value 
     
     
@@ -266,7 +264,7 @@ overheadCostCalculator <- function(fleetSize, fleet){
         if (fleetSize < fleetDefinitionSize) {
             stop("Please check fleet size.")
         } else {
-            totCost <- overheadCost + operationsManagementCost
+            totCost <- overheadCost + operationsManagementCost_veh_d
         }
     }
     
